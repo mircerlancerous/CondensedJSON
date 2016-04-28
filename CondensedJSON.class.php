@@ -1,28 +1,36 @@
 <?php
-class CondensedJSON{
-	public function CondensedJSON(){}
+class CJSON{
+	public function CJSON(){}
+	public static function stringify($inObj){
+		return CJSON::encodeJSON($inObj);
+	}
 	public static function encodeJSON($inObj){
-		$newObj = CondensedJSON::copyObject($inObj);
+		$newObj = CJSON::copyObject($inObj);
 		$foundArr = FALSE;
-		if(CondensedJSON::checkProperty($newObj)){
-			$newObj = CondensedJSON::compressArray($newObj);
+		if(CJSON::checkProperty($newObj)){
+			$newObj = CJSON::compressArray($newObj);
 			$foundArr = TRUE;
 		}
 		else{
-			$properties = get_object_vars($newObj);
-			foreach($properties as $property => $value){
-				if(!CondensedJSON::checkProperty($newObj->$property)){
-					continue;
+			$properties = @get_object_vars($newObj);
+			if($properties){
+				foreach($properties as $property => $value){
+					if(!CJSON::checkProperty($newObj->$property)){
+						continue;
+					}
+					//this is an appropriate array so compress it
+					$newObj->$property = CJSON::compressArray($newObj->$property);
+					$foundArr = TRUE;
 				}
-				//this is an appropriate array so compress it
-				$newObj->$property = CondensedJSON::compressArray($newObj->$property);
-				$foundArr = TRUE;
 			}
 		}
 		if($foundArr){
 			return "C".json_encode($newObj);
 		}
 		return json_encode($newObj);
+	}
+	public static function parse($jsonStr){
+		return CJSON::decodeJSON($jsonStr);
 	}
 	public static function decodeJSON($jsonStr){
 		//if the first character is not a 'C' then this is regular JSON
@@ -32,17 +40,19 @@ class CondensedJSON{
 		}
 		$jsonStr = substr($jsonStr,1);
 		$inObj = json_decode($jsonStr);
-		if(CondensedJSON::checkProperty($inObj)){
-			$inObj = CondensedJSON::uncompressArray($inObj);
+		if(CJSON::checkProperty($inObj)){
+			$inObj = CJSON::uncompressArray($inObj);
 		}
 		else{
-			$properties = get_object_vars($inObj);
-			foreach($properties as $property => $value){
-				if(!CondensedJSON::checkProperty($inObj->$property,FALSE)){
-					continue;
+			$properties = @get_object_vars($inObj);
+			if($properties){
+				foreach($properties as $property => $value){
+					if(!CJSON::checkProperty($inObj->$property,FALSE)){
+						continue;
+					}
+					//this is an appropriate array so uncompress it
+					$inObj->$property = CJSON::uncompressArray($inObj->$property);
 				}
-				//this is an appropriate array so uncompress it
-				$inObj->$property = CondensedJSON::uncompressArray($inObj->$property);
 			}
 		}
 		return $inObj;
