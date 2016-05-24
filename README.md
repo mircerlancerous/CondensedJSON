@@ -15,17 +15,15 @@ Currently only supports arrays at the first and second levels of an object. If t
 
 PHP Usage:
 
-include_once("CondensedJSON.class.php");
+include_once("CJSON.class.php");
 
-$cjsonSTR = CondensedJSON::encodeJSON($obj);
+$cjsonSTR = CJSON::stringify($obj);
 
-$obj = CondensedJSON::decodeJSON(cjsonSTR);
+$obj = CJSON::parse(cjsonSTR);
 
 
 JavaScript Usage:
 
-var CJSON = new CondensedJSON();
+var CJSONStr = CJSON.stringify(obj);
 
-var CJSONStr = CJSON.encodeJSON(obj);
-
-obj = CJSON.decodeJSON(CJSONStr);
+obj = CJSON.parse(CJSONStr);
