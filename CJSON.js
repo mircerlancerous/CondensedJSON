@@ -1,26 +1,32 @@
+
 var CJSON = (function(){
-	var self = (function(){
+    var self = (function(){
 		return {
 			
-			checkProperty: function(property){
-				if(!Array.isArray(property)){
+			checkProperty: function(property, compress){
+				if((!Array.isArray(property) && typeof(property) !== 'Object') || !property){
 					return false;
 				}
 				//if the array is empty or just one row then skip it
 				if(property.length < 2){
 					return false;
 				}
-				//check all properties and skip if none are arrays or objects
-			/*	var found = false;
+				//if we're uncompressing fewer checks are possible/required
+				if(typeof(compress) === 'boolean' && !compress){
+					return true;
+				}
+				//check all properties and skip if none are objects
+				var found = false;
 				for(var i=0; i<property.length; i++){
-					if(typeof(property[i]) === 'object'){
+					if(typeof(property[i]) === 'object' && !Array.isArray(property[i])){
 						found = true;
 						break;
 					}
 				}
 				if(!found){
 					return false;
-				}*/
+				}
+				
 				return true;
 			},
 			
@@ -52,10 +58,10 @@ var CJSON = (function(){
 			},
 			
 			uncompressArray: function(inArr){
-				var original = new Array();
+				var original = [];
 				var keys = inArr[0];
 				for(var i=1; i<inArr.length; i++){
-					var row = new Object();
+					var row = {};
 					if(inArr[i] !== null){
 						for(var v=0; v<keys.length; v++){
 							var key = keys[v];
@@ -68,7 +74,7 @@ var CJSON = (function(){
 						}
 					}
 					else{
-						row = null;
+						break;
 					}
 					original[i-1] = row;
 				}
@@ -86,6 +92,8 @@ var CJSON = (function(){
 		encodeJSON: function(inObj){
 			var foundArr = false;
 			var newObj = this.copyObject(inObj);
+			var head = "C";
+			
 			if(self.checkProperty(newObj)){
 				newObj = self.compressArray(newObj);
 				foundArr = true;
@@ -96,12 +104,16 @@ var CJSON = (function(){
 					if(!self.checkProperty(newObj[properties[i]])){
 						continue;
 					}
+					if(head != "C"){
+						head += ",";
+					}
+					head += properties[i];
 					newObj[properties[i]] = self.compressArray(newObj[properties[i]]);
 					foundArr = true;
 				}
 			}
 			if(foundArr){
-				return "C"+JSON.stringify(newObj);
+				return head+JSON.stringify(newObj);
 			}
 			return JSON.stringify(newObj);
 		},
@@ -119,21 +131,32 @@ var CJSON = (function(){
 			if(firstChar != 'C'){
 				var inObj = JSON.parse(jsonStr);
 				//if the first property is a zero - array index
-				if(typeof(inObj[0]) !== 'undefined'){
+				if(!Array.isArray(inObj) && typeof(inObj[0]) !== 'undefined'){
 					//set the length property of the object - in case it wasn't parsed to an array
 					inObj.length = Object.getOwnPropertyNames(inObj).length;
 				}
 				return inObj;
 			}
-			jsonStr = jsonStr.substring(1);
+			
+			var pos = jsonStr.search("{");
+			var pos2 = jsonStr.search("\\[");
+			if((pos === -1 && pos2 !== -1) || (pos2 !== -1 && pos2 < pos)){
+				pos = pos2;
+			}
+			var mapData = jsonStr.substring(1,pos).split(",");
+			
+			jsonStr = jsonStr.substring(pos);
 			var inObj = JSON.parse(jsonStr);
-			if(self.checkProperty(inObj)){
+			if(self.checkProperty(inObj,false)){
 				inObj = self.uncompressArray(inObj);
 			}
 			else{
 				var properties = Object.getOwnPropertyNames(inObj);
 				for(var i=0; i<properties.length; i++){
-					if(!self.checkProperty(inObj[properties[i]])){
+					if(!self.checkProperty(inObj[properties[i]],false)){
+						continue;
+					}
+					if(mapData.indexOf(properties[i]) == -1){
 						continue;
 					}
 					inObj[properties[i]] = self.uncompressArray(inObj[properties[i]]);
