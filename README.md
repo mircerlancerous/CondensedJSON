@@ -22,7 +22,7 @@ CJSON (172 characters):
     [5,"pech","Peach"],
     [6,"plum","Plum"]]
 
-Currently only supports arrays at the first and second levels of an object. If there are arrays in objects that are in objects that are properties of the primary object (or deeper), then they won't be compressed. Note also that it will only compress arrays at one level or the other, not both.
+Supports arrays at the first and second levels of an object. If there are arrays in objects that are in objects that are properties of the primary object (or deeper), then they won't be compressed. Note also that it will only compress arrays at one level or the other, not both.
 
 
 PHP Usage:
