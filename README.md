@@ -1,5 +1,5 @@
 # CondensedJSON
-Condense your JSON prior to transmitting or zipping. Classes for PHP and JavaScript make this an excellent client server tool to increase speed and bandwidth efficiency.
+Condense your JSON prior to transmitting or zipping. Classes for PHP, C#.Net, and JavaScript make this an excellent client server tool to increase speed and bandwidth efficiency.
 
 JSON (331 characters):
 
@@ -27,11 +27,21 @@ Supports arrays at the first and second levels of an object. If there are arrays
 
 PHP Usage:
 
+    //$obj == some object
     include_once("CJSON.class.php");
-    $cjsonSTR = CJSON::stringify($obj);
-    $obj = CJSON::parse(cjsonSTR);
+    $CJSONStr = CJSON::stringify($obj);
+    $obj = CJSON::parse($CJSONStr);
 
 JavaScript Usage:
 
+    //obj == some object
     var CJSONStr = CJSON.stringify(obj);
     obj = CJSON.parse(CJSONStr);
+
+C#.Net Usage:
+
+    //obj == some object
+    string CJSONStr = CJSON.stringify(obj);
+    obj = CJSON.parse(CJSONStr);
+
+Note that the C# class requires [JSON.Net](http://www.newtonsoft.com/json) to be a project reference.
