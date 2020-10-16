@@ -1,3 +1,5 @@
+This project has been replaced by [something better](https://github.com/offthebricks/LOEN), and will no longer be developed.
+
 # CondensedJSON
 Condense your JSON prior to transmitting or zipping. Classes for PHP, C#.Net, and JavaScript make this an excellent client server tool to increase speed and bandwidth efficiency.
 
